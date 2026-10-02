@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ChloroTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f6f5;--card:#fff;--ink:#0e2a2e;--mute:#587076;--line:#d3dedd;--acc:#b02a73;--green:#1f8a4c;--yellow:#b78a00;--orange:#d9631b;--red:#c0302f}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1b1e;--card:#12272b;--ink:#e6f0ef;--mute:#8fa8ac;--line:#24424a;--acc:#e263a6}}
+:root[data-theme="dark"]{--bg:#0b1b1e;--card:#12272b;--ink:#e6f0ef;--mute:#8fa8ac;--line:#24424a;--acc:#e263a6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Atkinson Hyperlegible',system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:26px;margin:0}h2{font-size:18px;margin:0 0 8px}
+header{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}header span{color:var(--mute)}
+nav{display:flex;gap:6px;margin-bottom:14px}
+button,select,input{font:inherit;color:inherit}
+nav button{flex:1;padding:10px;border:2px solid var(--line);background:var(--card);border-radius:10px;cursor:pointer}
+nav button[aria-selected=true]{border-color:var(--acc);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.btn{padding:12px 16px;border-radius:10px;border:2px solid var(--acc);background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
+.btn.alt{background:transparent;color:var(--acc)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1;min-width:120px}
+input[type=text],select{width:100%;padding:10px;border:2px solid var(--line);border-radius:10px;background:var(--bg)}
+canvas{width:100%;border-radius:10px;background:#000;touch-action:manipulation;display:block}
+.step{color:var(--mute);margin:8px 0}
+.res{border-left:10px solid var(--c);}
+.val{font-size:48px;font-weight:700;line-height:1}
+.val small{font-size:18px;color:var(--mute)}
+.badge{display:inline-block;color:#fff;background:var(--c);padding:3px 10px;border-radius:99px;font-weight:700}
+.sw{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.sw button{min-width:64px;border:2px solid var(--line);border-radius:10px;background:var(--card);padding:4px;cursor:pointer}
+.sw i{display:block;height:34px;border-radius:6px;margin-bottom:2px}
+.note{color:var(--mute);font-size:14px}
+li{padding:8px 0;border-bottom:1px solid var(--line);list-style:none}ul{padding:0;margin:0}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--c);margin-right:6px}
+textarea{width:100%;height:110px;background:var(--bg);color:var(--ink);border:2px solid var(--line);border-radius:10px}
+[hidden]{display:none!important}
+
+:root{--deep:#0f4c57}
+main{padding-bottom:104px}
+header{align-items:center;gap:12px;padding:6px 2px 16px}
+.logo{width:46px;height:46px;flex:none}
+header h1{font-size:28px;letter-spacing:-.5px;line-height:1.1}
+header span{display:block;font-size:15px}
+.card{border-radius:18px;padding:16px;box-shadow:0 8px 24px -18px rgba(11,37,41,.5)}
+nav{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--line);z-index:5;justify-content:center}
+nav button{max-width:200px;border:0;background:transparent;border-radius:14px;color:var(--mute);display:flex;flex-direction:column;align-items:center;font-size:13px;padding:6px}
+nav button:before{content:attr(data-i);font-size:22px;line-height:1.2}
+nav button[aria-selected=true]{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.btn{border-radius:14px;min-height:48px}
+.btn.big{flex:2 1 220px;display:flex;align-items:center;justify-content:center;font-size:18px;min-height:56px}
+.btn:focus-visible,nav button:focus-visible,#drop:focus-visible,.sw button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:30px 20px;border:2px dashed var(--line);border-radius:16px;color:var(--mute);cursor:pointer}
+#drop b{color:var(--ink);font-size:18px}
+#step{background:var(--bg);padding:10px 12px;border-radius:12px;border-left:4px solid var(--acc);color:var(--ink)}
+.res{border-left:0;border-top:8px solid var(--c)}
+.val{font-size:60px;letter-spacing:-2px}
+.gauge{position:relative;margin:18px 0 8px}
+.bar{height:14px;border-radius:99px;background:linear-gradient(90deg,var(--red) 0 14%,var(--orange) 14% 20%,var(--green) 20% 45%,var(--yellow) 45% 96%,var(--red) 96%)}
+.pin{position:absolute;top:-6px;width:4px;height:26px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 3px var(--card);transform:translateX(-2px);animation:pin .9s cubic-bezier(.2,.8,.2,1)}
+@keyframes pin{from{left:0}}
+@media(prefers-reduced-motion:reduce){.pin{animation:none}}
+.ticks{position:relative;height:18px;margin-top:8px;font-size:12px;color:var(--mute)}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.badge{font-size:17px;padding:4px 14px}
+.sw button{border-radius:12px;min-width:68px}
+.sw i{height:40px;border-radius:8px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;font-size:13px;color:var(--mute)}
+.tiles b{display:block;font-size:28px;color:var(--ink);line-height:1.1}
+li:last-child{border-bottom:0}
+</style></head><body><main>
+<header><svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3C24 3 8 20 8 30a16 16 0 0 0 32 0C40 20 24 3 24 3z" fill="#0f4c57"/><rect x="20.5" y="18" width="7" height="20" rx="3.5" fill="#fff"/><rect x="20.5" y="22" width="7" height="7" fill="#e263a6"/></svg><div><h1>ChloroTrack</h1><span>Is your water safe? Scan the strip.</span></div></header>
+<nav role="tablist"><button role="tab" data-t="test" data-i="💧" aria-selected="true">Test</button><button role="tab" data-t="hist" data-i="🗂️" aria-selected="false">History</button><button role="tab" data-t="guide" data-i="ℹ️" aria-selected="false">Guide</button></nav>
+
+<section id="test">
+ <div class="card">
+  <div class="row"><label class="btn big">Take or choose photo<input id="file" type="file" accept="image/*" capture="environment" hidden></label>
+  <button class="btn alt" id="demoBtn">Try demo strip</button></div>
+  <p class="step" id="step">Photograph the strip beside the white square of your reference card.</p>
+  <div id="drop" role="button" tabindex="0"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect x="6" y="6" width="22" height="22" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><rect x="34" y="6" width="10" height="44" rx="5" fill="none" stroke="currentColor" stroke-width="3"/><rect x="36.5" y="12" width="5" height="9" fill="#b02a73"/></svg><b>Add a strip photo</b><span>Lay the strip next to the white square of your reference card, in even light.</span></div><canvas id="cv" width="640" height="420" hidden></canvas>
+  <div class="row" style="margin-top:8px" id="demoCtl" hidden><select id="demoC" aria-label="Demo concentration"></select><select id="demoL" aria-label="Demo lighting"><option value="0">Daylight</option><option value="1">Warm bulb</option><option value="2">Dim shade</option></select></div>
+ </div>
+ <div class="card"><h2>No clear photo? Match the colour</h2>
+  <div class="sw" id="sw"></div><p class="note">Pick the swatch closest to your strip pad.</p></div>
+ <div id="out"></div>
+</section>
+
+<section id="hist" hidden>
+ <div class="card" id="stats"></div>
+ <div class="card"><ul id="list"></ul><div class="row" style="margin-top:10px"><button class="btn alt" id="csv">Show CSV</button><button class="btn alt" id="clr">Clear history</button></div><textarea id="csvOut" hidden readonly></textarea></div>
+</section>
+
+<section id="guide" hidden>
+ <div class="card"><h2>How to test</h2><ol><li>Dip the strip in water for the time on the pack, then shake off.</li><li>Place it next to the white square of the reference card, in even light, within 30 seconds.</li><li>Photograph, tap the white square, then tap the strip pad.</li><li>Read the result and save it.</li></ol></div>
+ <div class="card"><h2>Safety limits used</h2><p class="note">At least 0.2 mg/L at the consumer's tap (BIS IS 10500:2012, WHO). Up to 1.0 mg/L is acceptable under BIS where no alternative source exists. WHO's health-based guideline value is 5 mg/L. Edit the LEVELS table in the code to match your state's rules.</p></div>
+ <div class="card"><h2>Limits of this tool</h2><p class="note">Chlorine residual shows disinfection, not that water is free of chemicals or all germs. The built-in colour scale is a demo; calibrate it with your strip batch and standard solutions before relying on readings. Confirm any doubtful result in a lab.</p></div>
+</section>
+</main>
+<script>
+// Demo calibration: [mg/L, sRGB]. Replace with batch-specific values from standard solutions.
+const CAL=[[0,'#F4EFE6'],[0.1,'#F3D3DC'],[0.2,'#EDB5CB'],[0.5,'#E28CB5'],[1,'#D3639C'],[2,'#BC3F86'],[3,'#A32C73'],[5,'#7F1A57']];
+// Safety thresholds (single place to edit). max = upper bound (mg/L) of the band.
+const LEVELS=[
+ {max:0.1,c:'--red',s:'No residual',msg:'Disinfection residual is missing. Water may carry germs.',act:'Boil water for 1 minute before drinking and report to the water operator.'},
+ {max:0.2,c:'--orange',s:'Too low',msg:'Below the 0.2 mg/L minimum for drinking water.',act:'Treat with chlorine tablet or boil before drinking. Report and retest later.'},
+ {max:0.5,c:'--green',s:'Safe to drink',msg:'Residual is in the recommended range.',act:'No action needed. Keep testing regularly.'},
+ {max:1.0,c:'--green',s:'Acceptable',msg:'Within the BIS permissible limit; may taste of chlorine.',act:'Safe to drink. Let it stand open for a while if the taste bothers you.'},
+ {max:5.0,c:'--yellow',s:'Over-chlorinated',msg:'Above the 1.0 mg/L BIS limit, below the WHO 5 mg/L guideline.',act:'Let water stand or aerate before drinking. Tell the operator to reduce dosing.'},
+ {max:1e9,c:'--red',s:'Unsafe',msg:'Chlorine is above 5 mg/L.',act:'Do not drink. Alert the operator now.'}];
+const $=id=>document.getElementById(id);
+const assess=v=>LEVELS.find(l=>v<l.max)||LEVELS[LEVELS.length-1];
+const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+const lin=x=>{x/=255;return x<=.04045?x/12.92:Math.pow((x+.055)/1.055,2.4)};
+function lab([r,g,b]){r=lin(r);g=lin(g);b=lin(b);
+ let X=(.4124*r+.3576*g+.1805*b)/.95047,Y=.2126*r+.7152*g+.0722*b,Z=(.0193*r+.1192*g+.9505*b)/1.08883;
+ const f=t=>t>.008856?Math.cbrt(t):7.787*t+16/116;return[116*f(Y)-16,500*(f(X)-f(Y)),200*(f(Y)-f(Z))]}
+const CL=CAL.map(([c,h])=>[c,lab(hex(h))]);
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+// Project a Lab colour onto the calibration polyline; return mg/L and distance (deltaE) to the curve.
+function estimate(L){let best={d:1e9,c:0};
+ for(let i=0;i<CL.length-1;i++){const [c0,A]=CL[i],[c1,B]=CL[i+1];
+  const ab=B.map((v,k)=>v-A[k]),ap=L.map((v,k)=>v-A[k]);
+  const t=Math.max(0,Math.min(1,(ab[0]*ap[0]+ab[1]*ap[1]+ab[2]*ap[2])/(ab[0]**2+ab[1]**2+ab[2]**2)));
+  const P=A.map((v,k)=>v+t*ab[k]),d=dist(L,P);
+  if(d<best.d)best={d,c:c0+t*(c1-c0)}}
+ return best}
+
+// ---- Image handling ----
+const cv=$('cv'),ctx=cv.getContext('2d',{willReadFrequently:true});let base=null,pts={},isDemo=false;
+function show(img){const r=Math.min(1,640/img.width);cv.width=img.width*r;cv.height=img.height*r;ctx.drawImage(img,0,0,cv.width,cv.height);base=ctx.getImageData(0,0,cv.width,cv.height);pts={};cv.hidden=false;$('drop').hidden=true;$('step').textContent='Step 1: tap the white square of the reference card.'}
+function mark(p,col){ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,14,0,7);ctx.stroke()}
+function sample(p){const n=7,d=ctx.getImageData(Math.max(0,p.x-n),Math.max(0,p.y-n),2*n+1,2*n+1).data;let m=[0,0,0],k=d.length/4;
+ for(let i=0;i<d.length;i+=4)for(let j=0;j<3;j++)m[j]+=d[i+j]/k;
+ let sd=0;for(let i=0;i<d.length;i+=4)sd+=Math.abs(d[i+1]-m[1])/k;return{rgb:m,sd}}
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;isDemo=false;$('demoCtl').hidden=true;const im=new Image();im.onload=()=>show(im);im.src=URL.createObjectURL(f)};
+cv.onclick=e=>{if(!base)return;const b=cv.getBoundingClientRect(),p={x:(e.clientX-b.left)*cv.width/b.width,y:(e.clientY-b.top)*cv.height/b.height};
+ if(!pts.white){pts.white=p;mark(p,'#0f0');$('step').textContent='Step 2: tap the pink pad on the strip.'}
+ else{ctx.putImageData(base,0,0);mark(pts.white,'#0f0');pts.pad=p;mark(p,'#ff0');analyze()}};
+function analyze(){const w=sample(pts.white),s=sample(pts.pad),notes=[];
+ const lum=(w.rgb[0]+w.rgb[1]+w.rgb[2])/3;
+ if(lum<110)notes.push('Photo is too dark. Move to better light and retake.');
+ if(lum>250)notes.push('White square is overexposed (glare). Retake without direct light.');
+ if(w.sd>12||s.sd>12)notes.push('Colour is uneven where you tapped (blur, shadow or glare). Retake or tap a flatter spot.');
+ const wb=w.rgb.map(v=>255/Math.max(v,1)),corr=s.rgb.map((v,i)=>Math.min(255,v*wb[i]));
+ const est=estimate(lab(corr)),conf=Math.max(0,1-est.d/20);
+ if(est.d>12)notes.push('Pad colour is far from the calibration scale. Check the strip is a matching DPD strip and not expired.');
+ result(est.c,conf,notes,'photo')}
+
+$('drop').onclick=()=>$('file').click();$('drop').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}};
+// ---- Demo strip ----
+$('demoC').innerHTML=CAL.map(([c])=>`<option value="${c}">${c} mg/L</option>`).join('');
+const TINT=[[1,1,1,1],[1,.9,.72,.95],[.7,.7,.75,.8]];
+$('demoBtn').onclick=()=>{$('demoCtl').hidden=false;drawDemo()};$('demoC').onchange=$('demoL').onchange=drawDemo;
+function drawDemo(){isDemo=true;const c=+$('demoC').value,t=TINT[+$('demoL').value],pad=hex(CAL.find(x=>x[0]===c)[1]);
+ const f=(rgb,y=0)=>`rgb(${rgb.map((v,i)=>Math.round(v*t[i]*t[3]+(Math.random()*6-3))).join(',')})`;
+ cv.width=640;cv.height=420;ctx.fillStyle='#5b6a6e';ctx.fillRect(0,0,640,420);
+ ctx.fillStyle=f([245,245,245]);ctx.fillRect(40,60,160,160);
+ ctx.fillStyle=f([225,225,215]);ctx.fillRect(260,40,70,340);
+ ctx.fillStyle=f(pad);ctx.fillRect(268,70,54,54);
+ // pixel noise
+ const d=ctx.getImageData(0,0,640,420);for(let i=0;i<d.data.length;i+=4){const n=Math.random()*8-4;d.data[i]+=n;d.data[i+1]+=n;d.data[i+2]+=n}
+ ctx.putImageData(d,0,0);base=ctx.getImageData(0,0,640,420);cv.hidden=false;$('drop').hidden=true;
+ pts={white:{x:120,y:140},pad:{x:295,y:97}};mark(pts.white,'#0f0');mark(pts.pad,'#ff0');analyze()}
+
+// ---- Manual swatches ----
+$('sw').innerHTML=CAL.map(([c,h])=>`<button data-c="${c}"><i style="background:${h}"></i>${c}</button>`).join('');
+$('sw').onclick=e=>{const b=e.target.closest('button');if(b)result(+b.dataset.c,null,[],'manual')};
+
+// ---- Result + rule engine ----
+let last=null;
+function result(v,conf,notes,mode){v=Math.round(v*10)/10;const L=assess(v),P=Math.min(100,Math.sqrt(v/5)*100).toFixed(1);last={t:Date.now(),v,s:L.s,c:L.c,mode,conf};
+ const confTxt=conf==null?'Matched by eye':'Confidence '+Math.round(conf*100)+'%'+(conf<.5?' (low, retest)':'');
+ $('out').innerHTML=`<div class="card res" style="--c:var(${L.c})"><div class="val">${v.toFixed(1)} <small>mg/L (ppm)</small></div>
+ <div class="gauge"><div class="bar"></div><div class="pin" style="left:${P}%"></div><div class="ticks"><span style="left:0;transform:none">0</span><span style="left:20%">0.2</span><span style="left:44.7%">1.0</span><span style="left:auto;right:0;transform:none">5+</span></div></div>
+ <p><span class="badge" style="--c:var(${L.c})">${L.s}</span> <span class="note">${confTxt}</span></p>
+ <p>${L.msg}</p><p><b>${L.act}</b></p>${notes.map(n=>`<p class="note">&#9888; ${n}</p>`).join('')}
+ <p class="note">FRC shows disinfection only; it does not prove water is free of chemical contamination.</p>
+ <div class="row"><select id="src" aria-label="Water source"><option>Tap</option><option>Handpump</option><option>Storage tank</option><option>Tanker</option><option>Well</option></select><input id="loc" type="text" placeholder="Village / ward / source ID"></div>
+ <div class="row" style="margin-top:8px"><button class="btn" id="save">Save result</button><button class="btn alt" id="gps">Add GPS</button></div><p class="note" id="msg"></p></div>`;
+ $('out').scrollIntoView({behavior:'smooth'});
+ $('gps').onclick=()=>{try{navigator.geolocation.getCurrentPosition(p=>{last.lat=+p.coords.latitude.toFixed(5);last.lon=+p.coords.longitude.toFixed(5);$('msg').textContent='Location added.'},()=>$('msg').textContent='Location not available.')}catch(e){$('msg').textContent='Location not available.'}};
+ $('save').onclick=()=>{last.src=$('src').value;last.loc=$('loc').value;const h=load();h.unshift(last);store(h);$('msg').textContent='Saved to History.'}}
+
+// ---- History (per-device) ----
+function load(){try{return JSON.parse(localStorage.getItem('ct')||'[]')}catch(e){return mem}}
+let mem=[];function store(h){mem=h;try{localStorage.setItem('ct',JSON.stringify(h))}catch(e){}}
+function renderHist(){const h=load(),ok=h.filter(x=>x.v>=.2&&x.v<=1).length;
+ const pct=h.length?Math.round(100*ok/h.length):0;$('stats').innerHTML=h.length?`<div class="tiles"><div><b>${h.length}</b>tests</div><div><b>${pct}%</b>in range</div><div><b>${h.filter(x=>x.v<.2).length}</b>below 0.2</div><div><b>${h.filter(x=>x.v>1).length}</b>above 1.0</div></div>`:'<h2>No tests yet</h2><p class="note">Saved results appear here.</p>';
+ $('list').innerHTML=h.map(x=>`<li><span class="dot" style="--c:var(${x.c})"></span><b>${x.v.toFixed(1)} mg/L</b> ${x.s}<br><span class="note">${new Date(x.t).toLocaleString()} &middot; ${x.src||''} ${x.loc||''}${x.lat?' &middot; '+x.lat+', '+x.lon:''}</span></li>`).join('');}
+$('csv').onclick=()=>{const t=$('csvOut');t.value='time,mg_per_L,status,source,place,lat,lon\n'+load().map(x=>[new Date(x.t).toISOString(),x.v,x.s,x.src||'',(x.loc||'').replace(/,/g,' '),x.lat||'',x.lon||''].join(',')).join('\n');t.hidden=false;t.select()};
+$('clr').onclick=()=>{store([]);renderHist()};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));
+ ['test','hist','guide'].forEach(id=>$(id).hidden=id!==b.dataset.t);if(b.dataset.t==='hist')renderHist()});
+</script></body></html>
